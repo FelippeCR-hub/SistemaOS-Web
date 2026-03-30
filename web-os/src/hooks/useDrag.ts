@@ -1,34 +1,26 @@
-import {
-    useState
-} from "react";
 
-export function useDrag(onMove) {
-    const [dragging, setDragging] = useState(false);
 
-    function onMouseDown(e) {
-        setDragging(true);
+export function useDrag(onMove: (x: number, y: number) => void) {
+  function onMouseDown(e: MouseEvent) {
+    const startX = e.clientX;
+    const startY = e.clientY;
 
-        const startX = e.clientX;
-        const startY = e.clientY;
-
-        function onMoveHandler(eMove) {
-            const dx = eMove.clientX - startX;
-            const dy = eMove.clientY - startY;
-            onMove(dx, dy);
-        }
-
-        function onUp() {
-            setDragging(false);
-            window.removeEventListener("mousemove", onMoveHandler);
-            window.removeEventListener("mouseup", onUp);
-        }
-
-        window.addEventListener("mousemove", onMoveHandler);
-        window.addEventListener("mouseup", onUp);
+    function onMoveHandler(eMove: MouseEvent) {
+      const dx = eMove.clientX - startX;
+      const dy = eMove.clientY - startY;
+      onMove(dx, dy);
     }
 
-    return {
-        onMouseDown,
-        dragging
-    };
+    window.addEventListener("mousemove", onMoveHandler);
+
+    window.addEventListener(
+      "mouseup",
+      () => {
+        window.removeEventListener("mousemove", onMoveHandler);
+      },
+      { once: true }
+    );
+  }
+
+  return { onMouseDown };
 }
